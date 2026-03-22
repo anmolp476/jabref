@@ -1,0 +1,53 @@
+name: Run OpenRewrite
+
+permissions:
+  contents: write
+  pull-requests: read
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/run-openrewrite.yml'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull Request number'
+        required: true
+        type: number
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.head_ref || github.ref }}-${{ github.event_name }}"
+  cancel-in-progress: true
+
+jobs:
+  rewrite:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          submodules: 'true'
+
+      - name: Checkout PR branch
+        run: |
+          gh pr checkout ${{ inputs.pr_number || github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{secrets.GH_TOKEN_JABREF_MACHINE_PR_APPROVE}}
+
+      - uses: ./.github/actions/setup-gradle
+
+      - name: Run rewrite
+        run: gradle --no-configuration-cache :rewriteRun
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit."
+          else
+            git add .
+            git commit -m "Fix issues using OpenRewrite"
+            git push
+          fi
