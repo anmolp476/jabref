@@ -294,75 +294,41 @@ Since `parseField` is private, these strings are passed into the public `parseSi
 
 
 
+## Method 4 - `AuthorListParser.parse(String listOfNames)`
 
-
-## Method 4 - `BibtexParser.parseString()`
-
-
-
-**Description**: This method is responsible for parsing BibTeX string variables defined by the `@string` tag. It consumes the opening bracket, extracts the string name, expects an equals sign, sends it to `parseFieldContent()` to extract the value, and verifies the closing bracket. 
-
-
+**Description**: This method takes a raw string representing an author or list of authors from a BibTeX file and parses it into an `AuthorList` object containing individual `Author` objects. It handles various string normalizations, specific separators (like "and", commas, and semicolons), special suffixes ("and others"), and complex name affixes ("jr", "von").
 
 **Step 2: Identify all the parameters to the functions**
-
-* There are no explicit parameters for this function
-
-* The implicit parameter is the `PushbackReader` stream once again (which holds the unparsed characters of the string declaration).
-
-
+* The explicit parameter is the `String listOfNames`.
+* The implicit parameters include the class constants used for parsing rules, such as `AVOID_TERMS_IN_LOWER_CASE`.
 
 **Step 3: Model the input domain in terms of characteristics and partitions**
+We will model this based on the control-flow branches present in the source code for separations and special cases.
 
-* **Characteristic A: Enclosure Bracket Style**
-
-    * *Block A1:* The declaration is enclosed in curly braces `{ ... }`.
-
-    * *Block A2:* The declaration is enclosed in parentheses `( ... )`.
-
-* **Characteristic B: String Name Validity**
-
-    * *Block B1:* The string name is a valid, populated alphanumeric token (e.g., `foo`).
-
-    * *Block B2:* The string name is entirely missing or empty before the `=` sign.
-
-* **Characteristic C: Content Enclosure Format**
-
-    * *Block C1:* The assigned value is bracketed `{bar}`.
-
-    * *Block C2:* The assigned value is quoted `"bar"`.
-
-
+* **Characteristic A: Author Separation Format**
+    * *Block A1:* Authors are explicitly separated by the word `" and "`.
+    * *Block A2:* Authors are separated purely by commas.
+    * *Block A3:* Single author (no separators present).
+* **Characteristic B: Presence of the "and others" Suffix**
+    * *Block B1:* The string ends with `" and others"`.
+    * *Block B2:* The string does not end with `" and others"`.
+* **Characteristic C: Presence of Name Affixes (e.g., jr, sr, von)**
+    * *Block C1:* The string contains a recognized affix from the `AVOID_TERMS_IN_LOWER_CASE` set (e.g., `"jr"`).
+    * *Block C2:* The string contains standard names without special affixes.
 
 **Step 4: Choose particular partitions and values from within those partitions**
+Applying Each Choice Coverage (ECC) to minimize the test suite. Our largest characteristic (A) has 3 blocks, meaning we only need 3 tests to ensure every single partition is executed at least once.
 
-Applying Each Choice Coverage (ECC) again, the largest characteristics contain exactly 2 blocks. We require a minimum of 2 tests to satisfy the criteria, but we will add a 3rd to explicitly cover the invalid/missing name boundary condition without masking other behaviors.
-
-
-
-* **Test 1 (A1, B1, C1):** Curly braces, valid name, bracketed value.
-
-* **Test 2 (A2, B1, C2):** Parentheses, valid name, quoted value.
-
-* **Test 3 (A1, B2, C1):** Curly braces, missing name, bracketed value.
-
-
+* **Test 1 (A1, B1, C1):** Separated by "and", contains "and others", contains an affix.
+* **Test 2 (A2, B2, C2):** Separated by commas, no "and others", no affix.
+* **Test 3 (A3, B2, C2):** Single author, no "and others", no affix.
 
 **Step 5: Refine into test values**
+These combinations are refined into concrete Java strings to feed into the `parse()` method.
 
-These inputs are passed into the public `parse(Reader)` method.
-
-
-
-* **Test 1 (A1, B1, C1):** `@string{foo = {bar}}`
-
-    * **Expected Output:** The parser successfully adds a `BibtexString` to the database with the name `"foo"` and the content `"bar"`.
-
-* **Test 2 (A2, B1, C2):** `@string(baz = "qux")`
-
-    * **Expected Output:** The parser successfully handles the parentheses and quotes, adding a `BibtexString` named `"baz"` with the content `"qux"`.
-
-* **Test 3 (A1, B2, C1):** `@string{ = {bar}}`
-
-    * **Expected Output:** Throws an `IOException` or `ParseException` due to the empty text token preceding the `=` sign.
-
+* **Test 1 (A1, B1, C1):** * *Input:* `"Smith, jr, John and Doe, Jane and others"`
+    * *Expected Output:* Triggers the affix logic, splits by "and", and appends the `Author.OTHERS` object. Returns an `AuthorList` with 3 items (Smith, Doe, and OTHERS).
+* **Test 2 (A2, B2, C2):** * *Input:* `"Smith, John, Doe, Jane"`
+    * *Expected Output:* Hits the comma-separation branch and successfully splits the string, returning an `AuthorList` with 2 distinct `Author` objects.
+* **Test 3 (A3, B2, C2):** * *Input:* `"Smith, John"`
+    * *Expected Output:* Returns an `AuthorList` containing 1 `Author` object with family name "Smith" and given name "John".
