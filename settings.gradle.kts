@@ -30,5 +30,5 @@ rootProject.name = "JabRef"
 javaModules {
     directory(".")
     versions("versions")
-    // include("jablib", "jabkit", "jabgui", "jabsrv", "jabsrv-cli", "test-support", "versions")
+    include("jablib", "jabkit", "jabgui", "jabsrv", "jabsrv-cli", "test-support", "versions")
 }
