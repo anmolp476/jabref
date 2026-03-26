@@ -108,6 +108,23 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.9.0</version>
         </plugin>
+        <plugin>
+              <!-- ChatUniTest Framework Group ID from www.github.com/ZJU-ACES-ISE -->
+              <groupId>io.github.ZJU-ACES-ISE</groupId>
+              <artifactId>chatunitest-maven-plugin</artifactId>
+              <version>2.0.0</version>
+            <configuration>
+                  <model>codeqwen:v1.5-chat</model>
+                  <url>http://localhost:11434/v1/</url>
+                  <!-- API Key was not needed in this step, so a placeholder is used. -->
+                  <apiKey>ollama</apiKey>
+                  <maxRounds>5</maxRounds>
+                  <classNames>
+                  <className>org.jabref.model.search.query.SearchQuery</className>
+                  <className>org.jabref.model.search.query.SearchResults</className>
+                  </classNames>
+            </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
