@@ -32,7 +32,7 @@ Here are the main steps to ISP,
 
 **Step 2: Identify all the parameters of this method**
 
-    1. There's the explicit parameter being the `Reader in` object. 
+* There's the explicit parameter being the `Reader in` object. 
 
 
 
