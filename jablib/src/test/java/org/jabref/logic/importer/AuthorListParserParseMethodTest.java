@@ -23,7 +23,7 @@ public class AuthorListParserParseMethodTest {
 
         Author firstAuthor = result.getAuthors().get(0);
         assertEquals("Smith", firstAuthor.getFamilyName().orElse(""), "First author family name should be Smith.");
-        // Corrected to getNameSuffix()
+
         assertEquals("jr", firstAuthor.getNameSuffix().orElse(""), "First author jr/affix should be parsed as jr.");
 
         Author secondAuthor = result.getAuthors().get(1);

@@ -204,94 +204,49 @@ For JUnit execution, these strings can be passed into the public `parseSingleEnt
 
     * *Expected Output:* Throws a `ParseException` or `IOException` because the opening bracket is missing.
 
-
-
-
-
+    
 ## Method 3 - `BibtexParser.parseField(BibEntry entry)`
 
-
-
-**Description**: This method reads from the parser's internal character stream to extract a single field name and its corresponding content (they're both treated as a key-value pair), and then injects that data into the provided `BibEntry` object. I'll use a functionality-based approach here too because the source code contains branching logic based on the semantic meaning of the field being parsed.
-
-
+**Description**: This method reads from the parser's internal character stream to extract a single field name and its corresponding content (treated as a key-value pair), and then injects that data into the provided `BibEntry` object. A functionality-based approach is used here because the source code contains branching logic based on the semantic meaning of the field being parsed.
 
 **Step 2: Identify all the parameters to the functions**
-
 * The explicit parameter is the `BibEntry entry` (The data structure into which the parsed field is stored).
-
 * The implicit parameter is the `PushbackReader` stream.
 
-
-
 **Step 3: Model the input domain in terms of characteristics and partitions**
-
 * **Characteristic A: Field Semantic Type (The Parsed Key)**
-
     * *Block A1:* Standard textual field (e.g., `title`, `journal`).
-
     * *Block A2:* Person Name field requiring concatenation logic (e.g., `author`, `editor`).
-
     * *Block A3:* Keyword field requiring separator logic (`StandardField.KEYWORDS`).
-
-    * *Block A4:* MacOS BibDesk file attachment (field name starts with `bdsk-file-`).
-
+    * *Block A4:* Custom/Unknown field (e.g., `custom-file`).
 * **Characteristic B: Prior State of `BibEntry` (The `entry.hasField` branch)**
-
     * *Block B1:* The `BibEntry` does *not* already contain a field with this name.
-
     * *Block B2:* The `BibEntry` *already contains* a field with this name.
-
 * **Characteristic C: Content Enclosure Format (The Parsed Value)**
-
     * *Block C1:* Value is enclosed in curly brackets `{content}`.
-
     * *Block C2:* Value is enclosed in double quotes `"content"`.
-
     * *Block C3:* Value is an unquoted numeric digit (e.g., `2026`).
-
-    * *Block C4:* Value utilizes string concatenation with the `#` operator (e.g., `Kopp # Kolb`).
-
-
+    * *Block C4:* Value utilizes string concatenation with the `#` operator (e.g., `"partA" # "partB"`).
 
 **Step 4: Choose particular partitions and values from within those partitions**
-
-Applying Each Choice Coverage (ECC) because it's simple and does the job.
-
-
+Applying Each Choice Coverage (ECC) to ensure all defined blocks are tested at least once.
 
 * **Test 1 (A1, B1, C1):** Standard field, new field, bracketed value.
-
 * **Test 2 (A2, B2, C2):** Person name, field already exists, quoted value.
-
 * **Test 3 (A3, B1, C3):** Keyword field, new field, numeric value.
-
-* **Test 4 (A4, B2, C4):** BibDesk file, field already exists, concatenated value.
-
-
+* **Test 4 (A4, B1, C4):** Custom field, new field, concatenated value.
 
 **Step 5: Refine into test values**
-
-Since `parseField` is private, these strings are passed into the public `parseSingleEntry(String)` method to trigger the target logic during JUnit execution.
-
-
+Since `parseField` is private, these string inputs are passed into the public wrapper `parseSingleEntry(String)` to trigger the target logic during JUnit execution.
 
 * **Test 1 (A1, B1, C1):** `@article{key, title={Software Testing}}`
-
     * **Expected Output:** The `title` field is cleanly parsed and set to `"Software Testing"`.
-
 * **Test 2 (A2, B2, C2):** `@article{key, author="Smith", author="Doe"}`
-
     * **Expected Output:** The parser catches the duplicate `PERSON_NAMES` field and concatenates them, resulting in the `author` field equaling `"Smith and Doe"`.
-
 * **Test 3 (A3, B1, C3):** `@article{key, keywords=2026}`
-
     * **Expected Output:** Parses the unquoted number into the keywords field successfully as `"2026"`.
-
-* **Test 4 (A4, B2, C4):** `@article{key, bdsk-file-1={dummy}, bdsk-file-1=YmFzZTY0 # dGVzdA==}`
-
-    * **Expected Output:** The parser enters the Base64 branch, concatenates the tokens via the `#` operator, and attempts to decode the resulting file attachment.
-
+* **Test 4 (A4, B1, C4):** `@article{key, custom-file="partA_" # "partB"}`
+    * **Expected Output:** The parser evaluates the `#` operator branch and correctly combines the quoted strings into `"partA_partB"` within the custom field.
 
 
 ## Method 4 - `AuthorListParser.parse(String listOfNames)`

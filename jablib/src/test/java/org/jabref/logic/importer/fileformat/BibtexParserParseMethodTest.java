@@ -25,7 +25,6 @@ public class BibtexParserParseMethodTest {
 
     @BeforeEach
     public void setUp() {
-        // Use RETURNS_DEEP_STUBS so the parser doesn't crash when asking for nested configurations
         importFormatPreferences = mock(ImportFormatPreferences.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
     }
 
@@ -71,11 +70,9 @@ public class BibtexParserParseMethodTest {
 
         assertEquals(1, database.getEntryCount(), "The parser should extract exactly one standard entry.");
         assertTrue(database.hasStringByName("foo"), "The parser should also extract the string macro.");
-        
-        // Verifying that the entry correctly identifies the string variable assignment
+
         var entry = database.getEntryByCitationKey("key1").get();
-        // Update the expected string to "#foo#"
-        assertEquals("#foo#", entry.getField(org.jabref.model.entry.field.StandardField.AUTHOR).get(), 
+        assertEquals("#foo#", entry.getField(org.jabref.model.entry.field.StandardField.AUTHOR).get(),
             "The author field should hold the macro reference formatted as '#foo#'.");
     }
 

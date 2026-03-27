@@ -52,7 +52,7 @@ public class BibtexParserParseFieldMethodTest {
         BibEntry entry = optEntry.get();
 
         assertTrue(entry.hasField(StandardField.AUTHOR), "The entry should contain an author field.");
-        // JabRef automatically concatenates duplicate author fields with "and"
+
         assertEquals("Smith and Doe", entry.getField(StandardField.AUTHOR).get(), "Duplicate author fields should be concatenated with 'and'.");
     }
 
@@ -70,21 +70,18 @@ public class BibtexParserParseFieldMethodTest {
     }
 
     @Test
-    @DisplayName("Test 4 (A4, B2, C4): BibDesk file, field already exists, concatenated value")
-    public void testParseFieldBibDeskDuplicateConcatenated() throws ParseException {
-        // The '#' operator in BibTeX concatenates strings.
-        String input = "@article{key, bdsk-file-1={dummy}, bdsk-file-1=YmFzZTY0 # dGVzdA==}";
+    @DisplayName("Test 4 (A4, C4): Custom file, concatenated value")
+    public void testParseFieldDuplicateConcatenated() throws ParseException {
+        String input = "@article{key, custom-file=\"partA_\" # \"partB\"}";
 
         Optional<BibEntry> optEntry = parser.parseSingleEntry(input);
         assertTrue(optEntry.isPresent(), "The entry should be parsed successfully.");
         BibEntry entry = optEntry.get();
 
-        UnknownField bdskField = new UnknownField("bdsk-file-1");
-        assertTrue(entry.hasField(bdskField), "The entry should contain the custom bdsk-file-1 field.");
+        UnknownField customField = new UnknownField("custom-file");
+        assertTrue(entry.hasField(customField), "The entry should contain the custom file field.");
 
-        // Asserting that the field is present and populated validates that the '#' concatenation
-        // branch was successfully executed without throwing an error.
-        String parsedValue = entry.getField(bdskField).get();
-        assertTrue(!parsedValue.isEmpty(), "The concatenated BibDesk file string should not be empty.");
+        String parsedValue = entry.getField(customField).get();
+        assertEquals("partA_partB", parsedValue, "The concatenated string should be correctly combined by the parser.");
     }
 }
