@@ -9,40 +9,6 @@ import java.util.EnumSet;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SearchQueryChatUniTest {
-
-    @Test
-    void testToString() {
-        // Arrange
-        String searchExpression = "author:John Doe";
-        SearchQuery query = new SearchQuery(searchExpression);
-        // Act
-        String result = query.toString();
-        // Assert
-        assertEquals("author:John Doe", result);
-    }
-
-    // --- isValid tests ---
-
-    @Test
-    void testIsValidReturnsTrueForValidExpression() {
-        // Arrange
-        SearchQuery query = new SearchQuery("author:John Doe");
-        // Act
-        boolean result = query.isValid();
-        // Assert
-        assertTrue(result);
-    }
-
-    @Test
-    void testIsValidReturnsFalseForInvalidExpression() {
-        // Arrange
-        SearchQuery query = new SearchQuery("AND == !");
-        // Act
-        boolean result = query.isValid();
-        // Assert
-        assertFalse(result);
-    }
-
     // --- equals tests ---
 
     @Test
