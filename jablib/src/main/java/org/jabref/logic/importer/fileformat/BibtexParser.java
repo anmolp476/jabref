@@ -741,7 +741,7 @@ public class BibtexParser implements Parser {
     }
 
     @ADR(49)
-    private void parseField(BibEntry entry) throws IOException {
+    void parseField(BibEntry entry) throws IOException {
         int startLine = line;
         int startColumn = column;
         Field field = FieldFactory.parseField(parseTextToken());

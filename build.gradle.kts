@@ -61,6 +61,14 @@ tasks.register("run") {
     dependsOn(":jabgui:run")
 }
 
+subprojects {
+    pluginManager.withPlugin("java") {
+        dependencies {
+            add("implementation", "io.github.ZJU-ACES-ISE:chatunitest-starter:1.4.0")
+        }
+    }
+}
+
 allprojects {
     tasks.cyclonedxDirectBom {
         includeConfigs =

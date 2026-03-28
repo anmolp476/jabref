@@ -101,6 +101,7 @@
   </dependencies>
 
   <build>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -114,6 +115,14 @@
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.15.0</version>
+          <configuration>
+            <compilerArgs>
+              <arg>--enable-preview</arg>
+            </compilerArgs>
+            <failOnWarning>false</failOnWarning>
+            <showWarnings>false</showWarnings>
+            <release>21</release>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -133,7 +142,7 @@
         <configuration>
           <apiKeys>ollama</apiKeys>
           <model>codeqwen:v1.5-chat</model>
-          <url>http://localhost:11434/v1/chat/completions</url>
+          <url>https://reaches-bedroom-petite-prague.trycloudflare.com/v1/chat/completions</url>
           <maxRounds>5</maxRounds>
         </configuration>
       </plugin>
